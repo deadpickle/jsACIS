@@ -100,7 +100,7 @@ var jsACIS = (function() {
 			type: 'POST',
 			crossDomain: true,
 			success: function(data, status, XHR) {
-				console.log(data);
+//				console.log(data,object);
 				//deviate from the default functions
 				if (typeof object.successFunction !== 'undefined') {
 					//set the data variable so that functions have something to work with
@@ -382,7 +382,7 @@ var jsACIS = (function() {
 					else {
 						//query will be stringified
 						//make the call to ACIS WS
-						aJaxCall(object, urls.meta);
+						aJaxCall(query_object, urls.meta);
 					}
 				}
 				else {
