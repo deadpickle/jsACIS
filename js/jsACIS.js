@@ -105,7 +105,10 @@ var jsACIS = (function() {
 				//deviate from the default functions
 				if (typeof object.successFunction === 'function') {
 					//set the data variable so that functions have something to work with
-					object.successParams.data = data;
+					if (typeof object.image !== 'undefined')
+						object.successParams.data = data.data;
+					else
+						object.successParams.data = data;
 					//Using apply to pass func_object as 'this' to the successFunction
 					object.successFunction.apply(object.successParams);
 				}
