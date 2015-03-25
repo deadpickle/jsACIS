@@ -9,7 +9,9 @@ var jsACIS = (function() {
 	 */
 	var urls = {
 			meta: 'http://data.rcc-acis.org/StnMeta',
-			data: 'http://data.rcc-acis.org/StnData'
+			data: 'http://data.rcc-acis.org/StnData',
+			multi: 'http://data.rcc-acis.org/MultiStnData',
+			grid: 'http://data.rcc-acis.org/GridData'
 	}
 	
 	/**
@@ -110,7 +112,14 @@ var jsACIS = (function() {
 				else {
 					//default to print returned contents to the html div
 					if (typeof object.query.output !== 'undefined') {
-						$('#jsresult').html(data);
+						if (object.query.output == 'csv')
+							$('#jsresult').html(data);
+						else if (object.query.output == 'json') {
+							if (typeof object.image !== 'undefined')
+								$('#jsresult').html('<img src="' + data.data + '" />');
+							else
+								$('#jsresult').html(JSON.stringify(data));
+						}
 					}
 					else {
 						$('#jsresult').html(JSON.stringify(data));
@@ -287,7 +296,7 @@ var jsACIS = (function() {
 		/**
 		 * Data Request
 		 * 
-		 * Function to make an ACIS-WS StnData request. Several checks are made 
+		 * Function to make an ACIS-WS StnData/MultiStnData request. Several checks are made 
 		 * on the object passed and whether the user request the alerts will be 
 		 * expressed if encountered and in most if not all cases the function will 
 		 * terminate. Checking to make sure the number of parameters the successFunction
@@ -328,7 +337,26 @@ var jsACIS = (function() {
 					}			
 					//query will be stringified
 					//make the call to ACIS WS
-					aJaxCall(query_object, urls.data);
+					if (typeof query_object.query.sid !== 'undefined')
+						aJaxCall(query_object, urls.data);
+					//Grid Data Call
+					else if (typeof query_object.query.grid !== 'undefined') {
+						if (typeof query_object.query.output !== 'undefined') {
+							//When user requests an image the returned value of the call is in
+							//base64 encoding. Because of this we can not, in this method pipe
+							//the returned value directly into an html img tag. Instead, we have
+							//to read the encoded base 64 string from the dat element in the returned
+							//json. This will switch the output to json but remember that the 
+							//user is expecting an image.
+							if (query_object.query.output == 'image') {
+								$.extend(query_object, {image: 1});
+								query_object.query.output = 'json';
+							}
+						}
+						aJaxCall(query_object, urls.grid);
+					}
+					else
+						aJaxCall(query_object, urls.multi);
 				}
 				else {
 					if (alert)
