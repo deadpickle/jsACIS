@@ -48,7 +48,7 @@ var jsACIS = (function() {
 		//extend the passed object with the defaults
 		$.extend(defaultObject, object);
 		//successFunction successParams defaults
-		if (typeof object.successFunction !== 'undefined') {
+		if (typeof object.successFunction === 'function') {
 			var paramsObject = {
 					data: ''
 			}
@@ -60,17 +60,16 @@ var jsACIS = (function() {
 			//check for geocode result request
 			if (defaultObject.geocode)
 				defaultObject.successParams.geocode = '';
-			
 		}
 		//errorFunction errorParams defaults
-		if (typeof object.errorFunction !== 'undefined') {
+		if (typeof object.errorFunction === 'function') {
 			var paramsObject = {
 					textStatus: '', 
 					errorThrown: ''
 			}
 			//errorParams must exist
 			if (typeof object.errorParams === 'undefined')
-				$.extend(defaultObject.errorParams, {errorParams: {}});
+				$.extend(defaultObject, {errorParams: {}});
 			//extend the passed object with the defaults
 			$.extend(defaultObject.errorParams, paramsObject);
 		}
@@ -100,9 +99,9 @@ var jsACIS = (function() {
 			type: 'POST',
 			crossDomain: true,
 			success: function(data, status, XHR) {
-//				console.log(data,object);
+				console.log(data,object);
 				//deviate from the default functions
-				if (typeof object.successFunction !== 'undefined') {
+				if (typeof object.successFunction === 'function') {
 					//set the data variable so that functions have something to work with
 					object.successParams.data = data;
 					//Using apply to pass func_object as 'this' to the successFunction
@@ -110,20 +109,28 @@ var jsACIS = (function() {
 				}
 				else {
 					//default to print returned contents to the html div
-					$('#jsresult').html(data);
+					if (typeof object.query.output !== 'undefined') {
+						$('#jsresult').html(data);
+					}
+					else {
+						$('#jsresult').html(JSON.stringify(data));
+					}
 				}
 			},
 			error: function(jqXHR, textStatus, errorThrown) {
 				//deviate from the default functions
-				if (typeof object.errorFunction !== 'undefined') {
+				if (typeof object.errorFunction === 'function') {
 					//set the error variables
 					object.errorParams.textStatus = textStatus;
-					object.errorParams.textStatus = errorThrown;
+					object.errorParams.errorThrown = errorThrown;
 					//Using apply to pass func_object as 'this' to the errorFunction
 					object.errorFunction.apply(object.errorParams);
 				}
 				else {
-					console.log('Error: ' + textStatus + ' ' + errorThrown);
+					if (object.alert)
+						alert('Error: ' + textStatus + ' ' + errorThrown);
+					else
+						console.log('Error: ' + textStatus + ' ' + errorThrown);
 				}
 			}
 		});
@@ -299,7 +306,7 @@ var jsACIS = (function() {
 					//extend object with default elements
 					var query_object = setup(object);
 					//are you passing a function...
-					if (typeof query_object.successFunction !== 'undefined') {
+					if (typeof query_object.successFunction === 'function') {
 						//check to make sure variables passed into the function 
 						//have the same number as those expected
 						if (object.successFunction.length != Object.keys(query_object.successParams).length) {
@@ -310,7 +317,7 @@ var jsACIS = (function() {
 							return -1;
 						}
 					}
-					if (typeof query_object.errorFunction !== 'undefined') {
+					if (typeof query_object.errorFunction === 'function') {
 						if (object.errorFunction.length != Object.keys(query_object.errorParams).length) {
 							if (alert)
 								alert("Parameters between errorFunction and errorParams do not match.");
