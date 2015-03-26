@@ -142,7 +142,7 @@ var jsACIS = (function() {
 					if (object.alert)
 						alert('Error: ' + textStatus + ' ' + errorThrown);
 					else
-						console.log('Error: ' + textStatus + ' ' + errorThrown);
+						$('#jsresult').html('Error: ' + textStatus + ' ' + errorThrown);
 				}
 			}
 		});
